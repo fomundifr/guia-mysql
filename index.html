@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="okaidia.css" />
+  <title></title>
+</head>
+<body>
+
+  <div class="container">
+    <div class="menu">
+      <h3 class="txt-menu">Guía Completa Mysql: CRUD</h3>
+      <button class="items" onclick="openCity('mysql', this, 'orange')" id="defaultOpen">Qué es Mysql?</button>
+      <button class="items" onclick="openCity('configuracion', this, 'orange')">Archivo Configuración</button>
+      <button class="items" onclick="openCity('database', this, 'orange')">Archivo Database</button>
+      <button class="items" onclick="openCity('crear', this, 'orange')">Crear</button>
+      <button class="items" onclick="openCity('leer', this, 'orange')">Leer</button>
+      <button class="items" onclick="openCity('actualizar', this, 'orange')">Actualizar</button>
+      <button class="items" onclick="openCity('eliminar', this, 'orange')">Eliminar</button>
+    </div>
+    <div class="content">
+      <div id="mysql" class="tabcontent">
+        <h3>Qué es mysql</h3>
+        <p>
+          MySQL es un sistema de gestión de bases de datos relacionales (RDBMS) de código abierto respaldado por Oracle y basado en el lenguaje de consulta estructurado (SQL). MySQL funciona prácticamente en todas las plataformas, incluyendo Linux, UNIX y Windows. Aunque puede utilizarse en una amplia gama de aplicaciones, MySQL se asocia más a menudo con las aplicaciones web y la publicación en línea.
+        </p>
+        <p>
+          MySQL es un componente importante de una pila empresarial de código abierto llamada LAMP. LAMP es una plataforma de desarrollo web que utiliza Linux como sistema operativo, Apache como servidor web, MySQL como sistema de gestión de bases de datos relacionales y PHP como lenguaje de scripting orientado a objetos (a veces se utiliza Perl o Python en lugar de PHP).
+        </p>
+        <p>
+          Originalmente concebido por la empresa sueca MySQL AB, MySQL fue adquirido por Sun Microsystems en 2008 y luego por Oracle cuando compró Sun en 2010. Los desarrolladores pueden utilizar MySQL bajo la licencia pública general GNU (GPL), pero las empresas deben obtener una licencia comercial de Oracle.
+        </p>
+        <div class="info">
+          <p>
+            <strong>Info!</strong> Aqui les aclaró una cosa: esta guia de mysql está hecha para que se use en entornos donde su web o su programa estén funcionando con nodejs.
+            <br>
+            <br>
+            Si usted esta haciendo otras cosas que no dean con nodejs debe buscar o solucionar como mejorarlo
+          </p>
+        </div>
+      </div>
+      <div id="configuracion" class="tabcontent">
+        <h3>Configuración</h3>
+        <p>
+          A continuación estaremos llamando a nuestra database y lo pondremos en nuestro archivo principal
+        </p>
+        <pre><code class="language-javascript">
+          (async () => {
+          conn = await require("./database.js");
+          })();
+        </code></pre>
+      </div>
+      <div id="database" class="tabcontent">
+        <h3>Archivo Database.js</h3>
+        <p>
+          Creamos un archivo llamado database.js donde ahí estará la conexion a nuestra base de datos.
+        </p>
+        <pre><code class="language-javascript">
+          const mysql = require('mysql');
+
+          console.log("Base de datos conectada")
+
+          const connection = mysql.createConnection({
+          host: 'tu-host',
+          user: 'usuario',
+          password: 'contrasena',
+          port: 3306,
+          database: 'database'
+          });
+
+          module.exports = connection;
+        </code></pre>
+      </div>
+      <div id="crear" class="tabcontent">
+        <h3>Crear</h3>
+        <pre><code class="language-javascript">
+          if (results.length === 0) {
+          console.log("agregando usuario")
+          conn.query('INSERT INTO usuariosdb (username, id_user, discriminator, avatar, pais_ciudad, urlpersonalizada, bio, facebook, twitter, youtube, web, sdiscord) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [data.username, data.id, data.discriminator, data.avatar, null, data.id, null, null, null, null, null, null], function (error, results, fields) {
+          if (error) throw error;
+          // Neat!
+          });
+          console.log("Nuevo Usuario");
+          } else {
+          console.log("Usuario ya Registrado");
+          }
+        </code></pre>
+      </div>
+      <div id="leer" class="tabcontent">
+        <h3>Leer</h3>
+        <pre><code class="language-javascript">
+          router.get("/", async function(req, res) {
+
+          const DatoUsers = new Promise((resolve, reject) => {
+          conn.query(`SELECT * FROM usuariosdb`, (error, results, fields) => {
+          if (error) {
+          return reject(error);
+          }
+          resolve(results)
+          });
+          });
+
+          DatoUsers.then(data => {
+          let UserData = data
+
+          res.render("panel/index.ejs",{
+          userDB: UserData
+          });
+          });
+          })
+        </code></pre>
+      </div>
+      <div id="actualizar" class="tabcontent">
+        <h3>Actualizar</h3>
+        <pre><code class="language-javascript">
+          .post("/:id/update", auth, async(req, res) => {
+
+          let iduser = req.params.id;
+          let urlper = req.body.urlper;
+          let paci = req.body.paci;
+          let bio = req.body.bio;
+          let facebook = req.body.facebook;
+          let twitter = req.body.twitter;
+          let youtube = req.body.youtube;
+          let discord = req.body.discord;
+          let web = req.body.web
+
+          const DatoUsers = new Promise((resolve,
+          reject) => {
+          conn.query(`SELECT * FROM usuariosdb WHERE id_user = '${iduser}'`,(error, results,  fields) => {
+          if (error) {
+          return reject(error);
+          }
+          resolve(results)
+          });
+          });
+
+          let UserData = await DatoUsers;
+
+          if (!urlper && !paci && !bio && !facebook && !twitter && !youtube && !discord && !web) {
+          urlper = UserData.urlper;
+          paci = UserData.paci;
+          bio = UserData.bio;
+          facebook = UserData.facebook;
+          twitter = UserData.twitter;
+          youtube = UserData.youtube;
+          discord = UserData.discord;
+          web = UserData.web;
+          }
+
+          conn.query(`UPDATE usuariosdb SET urlpersonalizada = '${urlper}', pais_ciudad = '${paci}', bio = '${bio}', facebook = '${facebook}', twitter = '${twitter}', youtube = '${youtube}', sdiscord = '${discord}', web = '${web}'  WHERE id_user = '${iduser}'`, (error,results,fields) => {
+          if (error) throw error;
+          res.redirect('/perfil')
+          });
+
+          })
+        </code></pre>
+      </div>
+      <div id="eliminar" class="tabcontent">
+        <h3>Eliminar</h3>
+        <pre><code class="language-javascript">
+          .get('/delete/:id', function(req, res, next) {
+
+          let id = req.params.id;
+          console.log(id)
+
+          conn.query('DELETE FROM usuariosdb WHERE id = ' + id, function(error, results, fields) {
+          //if(err) throw err
+          if (error) {
+          // set flash message
+          throw error;
+          } else {
+          console.log("Eliminado")
+          // redirect to books page
+          res.redirect('/panel')
+          }
+          })
+          })
+        </code></pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+  <script src="okaidia.js"></script>
+</body>
+</html>
+<!--
+  <pre><code class="language-javascript">
+      (async () => {
+        conn = await require("./database.js");
+      })();
+    </code></pre>
+-->
